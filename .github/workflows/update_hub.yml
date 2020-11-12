@@ -1,0 +1,26 @@
+name: Update hub
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-jina-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - run: |
+          apt-get update -y
+          apt-get install python3.7 git python3-distutils -y
+          curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+          python3.7 get-pip.py
+          pip install gitpython ruamel.yaml
+          git clone https://github.com/jina-ai/jina-hub.git jina-hub
+          output=$(python3.7 scripts/jina-hub-update.py)
+          output="${output//'%'/'%25'}"
+          output="${output//$'\n'/'%0A'}"
+          output="${output//$'\r'/'%0D'}"
+          echo "::set-output name=changelog::$output"
+        id: step1
+
